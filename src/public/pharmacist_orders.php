@@ -1,71 +1,84 @@
 <?php
-require_once __DIR__ . '/auth.php';
+require_once 'auth.php';
 $user = require_role('pharmacist');
 global $pdo;
 
-include __DIR__ . '/header.php';
+$pharmacistId = (int)$user['role_id'];
 
+/* клиники фармацевта */
 $stmt = $pdo->prepare("
-    SELECT o.*, u.full_name AS customer_name, c.full_name AS clinic_name
-    FROM orders o
-    JOIN customers cust ON cust.id = o.customer_id
-    JOIN users u ON u.id = cust.id_user
-    JOIN clinics c ON c.id = o.clinic_id
-    WHERE o.clinic_id = ?
-    ORDER BY o.order_date DESC, o.id DESC
+  SELECT c.id, c.full_name
+  FROM pharmacist_clinics pc
+  JOIN clinics c ON c.id = pc.clinic_id
+  WHERE pc.pharmacist_id = ?
 ");
-$stmt->execute([$user['clinic_id']]);
-$orders = $stmt->fetchAll();
+$stmt->execute([$pharmacistId]);
+$clinics = $stmt->fetchAll();
+
+$clinicId = (int)($_GET['clinic_id'] ?? ($clinics[0]['id'] ?? 0));
+
+include 'header.php';
 ?>
-<div class="container pageHeader">
-    <h1>Заказы моей аптеки</h1>
-</div>
 
 <div class="container">
+    <h1>Заказы</h1>
+
+    <form method="get" style="margin-bottom:15px;">
+        <label>Аптека:</label>
+        <select name="clinic_id">
+            <?php foreach ($clinics as $c): ?>
+                <option value="<?= $c['id'] ?>" <?= $c['id']==$clinicId?'selected':'' ?>>
+                    <?= htmlspecialchars($c['full_name']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+        <button class="herb-btn herb-btn-outline">Показать</button>
+    </form>
+
+    <?php
+    $stmt = $pdo->prepare("
+  SELECT o.*
+  FROM orders o
+  WHERE o.clinic_id = ?
+  ORDER BY o.order_date DESC
+");
+    $stmt->execute([$clinicId]);
+    $orders = $stmt->fetchAll();
+    ?>
+
     <?php foreach ($orders as $o): ?>
         <div class="card">
             <div class="cardHeader">
-                Заказ №<?= $o['id'] ?> от <?= htmlspecialchars($o['order_date']) ?> —
-                <?= htmlspecialchars($o['customer_name']) ?>
+                Заказ №<?= $o['id'] ?> — <?= $o['order_date'] ?>
             </div>
-            <div>Статус: <strong><?= htmlspecialchars($o['status'] ?? 'new') ?></strong></div>
-            <?php if (empty($o['dispensed_at'])): ?>
-                <form action="order_set_status.php" method="post" class="inlineForm">
-                    <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
-                    <select name="status">
-                        <option value="processing">В обработке</option>
-                        <option value="ready">Готов к выдаче</option>
-                        <option value="cancelled">Отменён</option>
-                    </select>
-                    <button class="btn btn-secondary">Обновить статус</button>
-                </form>
 
-                <form action="order_dispense.php" method="post" class="inlineForm">
-                    <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
-                    <button class="btn btn-primary">Отметить как выданный</button>
-                </form>
-            <?php else: ?>
-                <div class="muted">
-                    Выдан: <?= htmlspecialchars($o['dispensed_at']) ?>
-                </div>
-            <?php endif; ?>
+            <div>Статус: <b><?= $o['status'] ?></b></div>
 
-            <?php
-            $stmtItems = $pdo->prepare("
-                SELECT oi.*, d.name AS drug_name
-                FROM order_items oi
-                JOIN drugs d ON d.id = oi.drug_id
-                WHERE oi.order_id = ?
-            ");
-            $stmtItems->execute([$o['id']]);
-            $items = $stmtItems->fetchAll();
-            ?>
-            <ul>
-                <?php foreach ($items as $it): ?>
-                    <li><?= htmlspecialchars($it['drug_name']) ?> — <?= (int)$it['quantity'] ?> шт.</li>
-                <?php endforeach; ?>
-            </ul>
+            <div class="inlineForm" style="margin-top:10px;">
+                <?php if ($o['status']=='new'): ?>
+                    <form action="order_update_status.php" method="post">
+                        <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
+                        <input type="hidden" name="status" value="picked">
+                        <button class="btn btn-secondary">Собран</button>
+                    </form>
+                <?php endif; ?>
+
+                <?php if ($o['status']=='picked'): ?>
+                    <form action="order_update_status.php" method="post">
+                        <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
+                        <input type="hidden" name="status" value="dispensed">
+                        <button class="btn btn-primary">Выдан</button>
+                    </form>
+                <?php endif; ?>
+
+                <form action="order_delete.php" method="post"
+                      onsubmit="return confirm('Удалить заказ?');">
+                    <input type="hidden" name="order_id" value="<?= $o['id'] ?>">
+                    <button class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
         </div>
     <?php endforeach; ?>
+
 </div>
-<?php include __DIR__ . '/footer.php'; ?>
+<?php include 'footer.php'; ?>
