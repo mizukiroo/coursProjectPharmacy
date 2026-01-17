@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Аптека/поликлиники — карта, рецепты и заказ</title>
+
+    <!-- MapGL (2ГИС) -->
+    <script src="https://mapgl.2gis.com/api/js/v1"></script>
+
+    <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+<div class="site">
+    <header class="siteHeader">
+        <div class="container headerRow">
+            <div class="brand">
+                <div class="brandLogo">💊</div>
+                <div class="brandText">
+                    <div class="brandTitle">МедСервис</div>
+                    <div class="brandSub">Карта, рецепты и заказ лекарств</div>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <a class="navLink" href="#map" data-route>Карта</a>
+                <a class="navLink" href="#recipes" data-route>Рецепты</a>
+                <a class="navLink" href="#my-meds" data-route>Мои лекарства</a>
+                <a class="navLink" href="#order" data-route>Заказ</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="siteMain">
+        <!-- MAP -->
+        <section id="page-map" class="page">
+            <div class="container pageHeader">
+                <h1>Карта организаций</h1>
+                <p class="muted">
+                    Слева — список, справа — карта. Клик по элементу/пину откроет окошко (popup).
+                </p>
+            </div>
+
+            <div class="container mapShell">
+                <aside class="sidebar" id="sidebar">
+                    <div class="sidebarTop">
+                        <input
+                                id="searchInput"
+                                class="input"
+                                type="text"
+                                placeholder="Поиск по названию…"
+                        />
+                    </div>
+
+                    <div class="list" id="orgList"></div>
+                </aside>
+
+                <div class="mapWrap">
+                    <div id="map" class="map"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECIPES -->
+        <section id="page-recipes" class="page hidden">
+            <div class="container pageHeader">
+                <h1>Рецепты</h1>
+                <p class="muted">Заглушка раздела. Позже подключим реальные рецепты/врача/пользователя.</p>
+            </div>
+
+            <div class="container card">
+                <h3>Пример рецепта</h3>
+                <div class="grid2">
+                    <div>
+                        <div class="fieldLabel">Пациент</div>
+                        <div class="fieldValue">Иванов И.И.</div>
+                    </div>
+                    <div>
+                        <div class="fieldLabel">Дата</div>
+                        <div class="fieldValue">2026-01-04</div>
+                    </div>
+                    <div>
+                        <div class="fieldLabel">Лекарство</div>
+                        <div class="fieldValue">Амоксициллин 500мг</div>
+                    </div>
+                    <div>
+                        <div class="fieldLabel">Схема</div>
+                        <div class="fieldValue">1 капсула 3 раза в день</div>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button class="btn" id="addExampleToMyMeds">Добавить в “Мои лекарства”</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MY MEDS -->
+        <section id="page-my-meds" class="page hidden">
+            <div class="container pageHeader">
+                <h1>Мои лекарства</h1>
+                <p class="muted">Пока хранится локально (localStorage), до подключения датасета/БД.</p>
+            </div>
+
+            <div class="container card">
+                <div class="rowBetween">
+                    <h3>Список</h3>
+                    <button class="btn danger" id="clearMyMeds">Очистить</button>
+                </div>
+
+                <div id="myMedsList" class="simpleList"></div>
+
+                <div class="divider"></div>
+
+                <h3>Добавить вручную</h3>
+                <div class="grid3">
+                    <input id="manualMedName" class="input" placeholder="Название" />
+                    <input id="manualMedDose" class="input" placeholder="Дозировка/форма (опц.)" />
+                    <button id="manualMedAdd" class="btn">Добавить</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ORDER -->
+        <section id="page-order" class="page hidden">
+            <div class="container pageHeader">
+                <h1>Заказ</h1>
+                <p class="muted">Заказывать можно только то, что есть в “Мои лекарства”.</p>
+            </div>
+
+            <div class="container card">
+                <div class="rowBetween">
+                    <h3>К заказу</h3>
+                    <button class="btn" id="refreshOrder">Обновить</button>
+                </div>
+
+                <div id="orderList" class="simpleList"></div>
+
+                <div class="divider"></div>
+
+                <div class="actions">
+                    <button class="btn primary" id="placeOrder">Оформить заказ</button>
+                    <div id="orderStatus" class="muted"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="siteFooter">
+        <div class="container footerRow">
+            <div class="muted">© 2026 МедСервис</div>
+            <div class="muted">Демо-проект. Данные условные.</div>
+        </div>
+    </footer>
+</div>
+
+<script src="./js/app.js"></script>
+</body>
+</html>
