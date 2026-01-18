@@ -69,6 +69,10 @@ $current = basename($_SERVER['PHP_SELF']);
                            class="herb-nav-link<?= $current === 'pharmacist_orders.php' ? ' herb-nav-link--active' : '' ?>">
                             Заказы аптеки
                         </a>
+                        <a href="pharmacist_receipts.php"
+                           class="herb-nav-link<?= $current === 'pharmacist_receipts.php' ? ' herb-nav-link--active' : '' ?>">
+                            Накладные
+                        </a>
 
                     <?php elseif ($user['role'] === 'admin'): ?>
                         <a href="admin_dashboard.php"

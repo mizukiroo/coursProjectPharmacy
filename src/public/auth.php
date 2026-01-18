@@ -1,10 +1,19 @@
 <?php
 // auth.php — логика авторизации и ролей
+
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 require_once __DIR__ . '/config.php';
 
+/**
+ * Возвращает данные текущего пользователя или null, если не залогинен.
+ */
 function get_current_user_data(): ?array
 {
     global $pdo;
+
     if (empty($_SESSION['user_id'])) {
         return null;
     }
@@ -14,58 +23,68 @@ function get_current_user_data(): ?array
         return $cached;
     }
 
-    $stmt = $pdo->prepare("SELECT id, login, full_name, email FROM users WHERE id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $user = $stmt->fetch();
+    $userId = (int)$_SESSION['user_id'];
+
+    // базовые данные из users
+    $stmt = $pdo->prepare("
+        SELECT id, login, full_name, email
+        FROM users
+        WHERE id = ?
+    ");
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$user) {
         return null;
     }
 
-    $uid = $user['id'];
-    $user['role'] = 'guest';
+    $uid = (int)$user['id'];
+
+    $user['role']    = 'guest';
     $user['role_id'] = null;
-    $user['clinic_id'] = null;
 
     // admin
     $stmt = $pdo->prepare("SELECT id FROM admins WHERE id_user = ?");
     $stmt->execute([$uid]);
-    if ($row = $stmt->fetch()) {
-        $user['role'] = 'admin';
-        $user['role_id'] = $row['id'];
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $user['role']    = 'admin';
+        $user['role_id'] = (int)$row['id'];
         return $cached = $user;
     }
 
     // doctor
     $stmt = $pdo->prepare("SELECT id FROM doctors WHERE id_user = ?");
     $stmt->execute([$uid]);
-    if ($row = $stmt->fetch()) {
-        $user['role'] = 'doctor';
-        $user['role_id'] = $row['id'];
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $user['role']    = 'doctor';
+        $user['role_id'] = (int)$row['id'];
         return $cached = $user;
     }
 
-    // pharmacist
-    $stmt = $pdo->prepare("SELECT id, id_clinic FROM pharmacists WHERE id_user = ?");
+    // pharmacist — БЕЗ id_clinic
+    $stmt = $pdo->prepare("SELECT id FROM pharmacists WHERE id_user = ?");
     $stmt->execute([$uid]);
-    if ($row = $stmt->fetch()) {
-        $user['role'] = 'pharmacist';
-        $user['role_id'] = $row['id'];
-        $user['clinic_id'] = $row['id_clinic'];
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $user['role']    = 'pharmacist';
+        $user['role_id'] = (int)$row['id'];
         return $cached = $user;
     }
 
     // patient
     $stmt = $pdo->prepare("SELECT id FROM customers WHERE id_user = ?");
     $stmt->execute([$uid]);
-    if ($row = $stmt->fetch()) {
-        $user['role'] = 'patient';
-        $user['role_id'] = $row['id'];
+    if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $user['role']    = 'patient';
+        $user['role_id'] = (int)$row['id'];
         return $cached = $user;
     }
 
     return $cached = $user;
 }
 
+/**
+ * Требует авторизацию.
+ */
 function require_login(): array
 {
     $user = get_current_user_data();
@@ -76,6 +95,9 @@ function require_login(): array
     return $user;
 }
 
+/**
+ * Требует одну из ролей.
+ */
 function require_role(string ...$roles): array
 {
     $user = require_login();

@@ -1,7 +1,6 @@
 <?php
 // config.php — подключение к БД и старт сессии
 
-session_start();
 
 $DB_HOST = 'localhost';
 $DB_NAME = 'course_pharmacy';
