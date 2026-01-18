@@ -1181,7 +1181,7 @@ body {
     justify-content: center;
     color: #f7fff9;
     font-size: 18px;
-    box-shadow: 0 10px 26px rgba(40, 110, 70, 0.35);
+    box-shadow: 0 10px 26px rgba(222, 246, 168, 0.35);
 }
 
 .herb-logo-mark--small {
@@ -2861,5 +2861,143 @@ ol + .btn,
 ol + button {
     margin-top: 16px !important;
     display: inline-block;
+}
+/* =========================
+   PHARMACIST PAGES (orders + receipts)
+   ========================= */
+
+/* Заголовок внутри карточки */
+.cardHeader {
+    font-weight: 800;
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    line-height: 1.25;
+}
+
+/* Верхняя панель: селект клиники, действия */
+.pharmToolbar {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin: 12px 0 16px;
+}
+
+.pharmToolbar .left,
+.pharmToolbar .right {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Поля форм на этих страницах */
+.pharmField label {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 6px;
+}
+
+.pharmField select,
+.pharmField input[type="number"],
+.pharmField input[type="text"],
+.pharmField input[type="datetime-local"] {
+    width: 100%;
+    max-width: 420px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid #e6e8f0;
+    background: #fff;
+    outline: none;
+}
+
+.pharmField select:focus,
+.pharmField input:focus {
+    border-color: #111827;
+}
+
+/* Кнопки в строку (формы рядом) */
+.inlineForm {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Бейджи статусов заказа */
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #eef0f5;
+    background: #f7f8fc;
+    color: #374151;
+}
+
+.status-new {
+    background: #f7f8fc;
+    border-color: #eef0f5;
+    color: #374151;
+}
+
+.status-picked {
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #9a3412;
+}
+
+.status-dispensed {
+    background: #ecfdf5;
+    border-color: #bbf7d0;
+    color: #166534;
+}
+
+.status-cancelled {
+    background: #fff5f5;
+    border-color: #ffd6d6;
+    color: #991b1b;
+}
+
+/* Накладные: строки добавления позиций */
+.receiptRows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.receiptRow {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 0.6fr auto;
+    gap: 10px;
+    align-items: end;
+    padding: 12px;
+    border: 1px solid #eef0f5;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.receiptRow .btn {
+    padding: 10px 12px;
+    border-radius: 12px;
+}
+
+@media (max-width: 860px) {
+    .receiptRow {
+        grid-template-columns: 1fr;
+    }
+
+    .pharmField select,
+    .pharmField input[type="number"],
+    .pharmField input[type="text"],
+    .pharmField input[type="datetime-local"] {
+        max-width: 100%;
+    }
 }
 
