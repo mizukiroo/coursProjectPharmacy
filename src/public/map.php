@@ -65,7 +65,6 @@ foreach ($clinics as $row) {
 ?>
 <div class="container pageHeader">
     <h1>Карта социальных аптек</h1>
-    <p class="muted">Справа карта, слева — быстрый поиск по названию поликлиники или аптеки.</p>
 </div>
 
 <div class="container">
