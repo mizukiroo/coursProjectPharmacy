@@ -55,16 +55,13 @@ $current = basename($_SERVER['PHP_SELF']);
                         </a>
 
                     <?php elseif ($user['role'] === 'doctor'): ?>
-                        <a href="doctor_prescriptions.php"
-                           class="herb-nav-link<?= $current === 'doctor_prescriptions.php' ? ' herb-nav-link--active' : '' ?>">
-                            Рецепты пациентов
-                        </a>
-                        <a href="doctor_new_prescription.php"
-                           class="herb-nav-link<?= $current === 'doctor_new_prescription.php' ? ' herb-nav-link--active' : '' ?>">
-                            Выписать рецепт
-                        </a>
+                    <a href="doctor_prescriptions.php"
+                       class="herb-nav-link<?= $current === 'doctor_prescriptions.php' ? ' herb-nav-link--active' : '' ?>">
+                        Рецепты пациентов
+                    </a>
 
-                    <?php elseif ($user['role'] === 'pharmacist'): ?>
+
+                <?php elseif ($user['role'] === 'pharmacist'): ?>
                         <a href="pharmacist_orders.php"
                            class="herb-nav-link<?= $current === 'pharmacist_orders.php' ? ' herb-nav-link--active' : '' ?>">
                             Заказы аптеки
