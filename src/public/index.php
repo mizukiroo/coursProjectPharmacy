@@ -27,11 +27,6 @@
 
         <div class="container landing-hero-grid">
             <div class="landing-hero-left">
-                <div class="landing-chip">
-                    <span class="landing-chip-dot"></span>
-                    Социальная программа льготного лекарственного обеспечения
-                </div>
-
                 <h1 class="landing-title">
                     Забронируйте льготные лекарства
                     <span>в удобной социальной аптеке</span>
@@ -53,15 +48,15 @@
 
                 <div class="landing-bullets">
                     <div class="landing-bullet">
-                        <span class="landing-bullet-icon">👩‍⚕️</span>
+                        <span class="landing-bullet-icon">☘︎️</span>
                         Назначение и доступ только по рецепту врача
                     </div>
                     <div class="landing-bullet">
-                        <span class="landing-bullet-icon">🏥</span>
+                        <span class="landing-bullet-icon">☘︎</span>
                         Социальные аптеки рядом с домом
                     </div>
                     <div class="landing-bullet">
-                        <span class="landing-bullet-icon">🔒</span>
+                        <span class="landing-bullet-icon">☘︎</span>
                         Без цен — только льготные программы
                     </div>
                 </div>
@@ -78,10 +73,7 @@
                 </div>
 
                 <div class="landing-stats">
-                    <div class="landing-stat">
-                        <div class="landing-stat-number">10&nbsp;000+</div>
-                        <div class="landing-stat-label">обработанных рецептов в год</div>
-                    </div>
+
                     <div class="landing-stat">
                         <div class="landing-stat-number">200+</div>
                         <div class="landing-stat-label">социальных аптек в системе</div>
