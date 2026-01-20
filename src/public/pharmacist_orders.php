@@ -143,7 +143,7 @@ include __DIR__ . '/header.php';
 
                     <div class="inlineForm" style="margin-top: 8px; flex-wrap: wrap; gap: 8px;">
                         <?php if ($status === 'new'): ?>
-                            <form action="order_update_status.php" method="post">
+                            <form action="order_set_status.php" method="post">
                                 <input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>">
                                 <input type="hidden" name="status"   value="picked">
                                 <button class="btn btn-secondary">Отметить «Собран»</button>
@@ -151,7 +151,7 @@ include __DIR__ . '/header.php';
                         <?php endif; ?>
 
                         <?php if ($status === 'picked'): ?>
-                            <form action="order_update_status.php" method="post">
+                            <form action="order_set_status.php" method="post">
                                 <input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>">
                                 <input type="hidden" name="status"   value="dispensed">
                                 <button class="btn btn-primary">Отметить «Выдан»</button>
@@ -159,7 +159,7 @@ include __DIR__ . '/header.php';
                         <?php endif; ?>
 
                         <?php if ($status !== 'cancelled' && $status !== 'dispensed'): ?>
-                            <form action="order_update_status.php" method="post"
+                            <form action="order_set_status.php" method="post"
                                   onsubmit="return confirm('Отменить заказ?');">
                                 <input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>">
                                 <input type="hidden" name="status"   value="cancelled">
@@ -167,11 +167,6 @@ include __DIR__ . '/header.php';
                             </form>
                         <?php endif; ?>
 
-                        <form action="order_delete.php" method="post"
-                              onsubmit="return confirm('Удалить заказ навсегда?');">
-                            <input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>">
-                            <button class="btn btn-danger">Удалить</button>
-                        </form>
                     </div>
                 </div>
             <?php endforeach; ?>
