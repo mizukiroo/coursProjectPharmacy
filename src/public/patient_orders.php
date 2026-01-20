@@ -11,7 +11,7 @@ if (!isset($user) || ($user['role'] ?? null) !== 'patient') {
 
 $customerId = $user['role_id'] ?? null;
 if (!$customerId) {
-    echo '<div class="container"><p>Не удалось определить профиль пациента.</p></div>';
+    echo '<div class="container"><div class="card"><div class="cardHeader">Ошибка</div><div class="muted">Не удалось определить профиль пациента.</div></div></div>';
     require_once __DIR__ . '/footer.php';
     exit;
 }
@@ -21,7 +21,7 @@ $stmt = $pdo->prepare("
     SELECT 
         o.id,
         o.order_date,
-        o.total_amount,
+        o.status,
         c.short_name AS clinic_name,
         c.full_name  AS clinic_full_name
     FROM orders o
@@ -31,116 +31,140 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute(['cid' => $customerId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Позиции заказа
+$stmtItems = $pdo->prepare("
+    SELECT 
+        oi.id,
+        oi.drug_id,
+        oi.form_id,
+        oi.quantity,
+        d.name      AS drug_name,
+        f.form_name AS form_name
+    FROM order_items oi
+    JOIN drugs d      ON d.id = oi.drug_id
+    LEFT JOIN forms f ON f.id = oi.form_id
+    WHERE oi.order_id = :oid
+    ORDER BY d.name, f.form_name
+");
+
+// Карта статусов как у аптекаря
+$statusMap = [
+        'new'       => 'Новый',
+        'picked'    => 'Собран',
+        'dispensed' => 'Выдан',
+        'cancelled' => 'Отменён',
+];
 ?>
 
-<main class="page page-orders">
-    <div class="container pageHeader">
-        <h1>Мои заказы</h1>
-        <p class="muted">
-            Здесь отображаются ваши брони и заказы на выдачу лекарств в социальных аптеках.
-        </p>
+<div class="container">
+    <h1>Мои заказы</h1>
+    <div class="muted" style="margin-bottom:12px;">
+        Здесь отображаются ваши заказы на выдачу лекарств в выбранных аптеках.
+        Статус обновляется, когда аптекарь отмечает сбор/выдачу.
     </div>
 
-    <div class="container">
-        <?php if (empty($orders)): ?>
-            <div class="emptyState">
-                <div class="emptyState-title">У вас пока нет оформленных заказов</div>
-                <p class="emptyState-text">
-                    Когда вы забронируете лекарства по рецепту, ваши заказы появятся в этом разделе.
-                </p>
-            </div>
-        <?php else: ?>
+    <?php if (empty($orders)): ?>
+        <div class="card">
+            <div class="cardHeader">У вас пока нет оформленных заказов</div>
+            <div class="muted">Когда вы забронируете лекарства по рецепту, ваши заказы появятся в этом разделе.</div>
+        </div>
+    <?php else: ?>
 
-            <div class="ordersList">
+        <div>
+            <?php foreach ($orders as $o): ?>
                 <?php
-                // Подготовим запрос для позиций каждого заказа
-                $stmtItems = $pdo->prepare("
-                    SELECT 
-                        oi.id,
-                        oi.drug_id,
-                        oi.quantity,
-                        d.name   AS drug_name,
-                        d.form   AS drug_form,
-                        d.dosage AS drug_dosage
-                    FROM order_items oi
-                    JOIN drugs d ON d.id = oi.drug_id
-                    WHERE oi.order_id = :oid
-                    ORDER BY d.name
-                ");
+                $stmtItems->execute(['oid' => $o['id']]);
+                $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
-                foreach ($orders as $o):
-                    $stmtItems->execute(['oid' => $o['id']]);
-                    $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+                $status = $o['status'] ?? 'new';
+                $statusLabel = $statusMap[$status] ?? $status;
 
-                    // Простой статус: пока без сложной логики, можно потом доработать
-                    $statusLabel = 'Оформлен';
-                    ?>
-                    <article class="landing-card orderCard">
-                        <div class="landing-card-header">
-                            <div>
-                                <div class="pill-badge pill-badge--green">
-                                    Заказ №<?= (int)$o['id'] ?>
-                                </div>
-                                <h2 class="card-title">
-                                    От <?= htmlspecialchars(date('d.m.Y', strtotime($o['order_date']))) ?>
-                                </h2>
-                            </div>
-                            <div class="orderCard-status">
-                                <span class="pill-badge pill-badge--soft">
+                // Под те же классы, что у pharmacist_orders.php (если они есть в CSS)
+                $badgeClass = 'status-new';
+                if ($status === 'picked')    $badgeClass = 'status-picked';
+                if ($status === 'dispensed') $badgeClass = 'status-dispensed';
+                if ($status === 'cancelled') $badgeClass = 'status-cancelled';
+                ?>
+
+                <div class="card" style="margin-top:15px;">
+                    <div class="cardHeader" style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+                        <div>Заказ №<?= (int)$o['id'] ?> — <?= htmlspecialchars(date('d.m.Y', strtotime($o['order_date']))) ?></div>
+
+                        <div class="orderCard-status">
+                            <!-- Если у тебя нет statusBadge в стилях — всё равно будет читабельно -->
+                            <span class="statusBadge <?= htmlspecialchars($badgeClass) ?>">
                                     <?= htmlspecialchars($statusLabel) ?>
                                 </span>
-                            </div>
+                        </div>
+                    </div>
+
+                    <div style="padding: 0 0 12px 0;">
+                        <div class="muted" style="margin-top:8px;">
+                            <span>Аптека</span>
+                            <strong>
+                                <?= htmlspecialchars($o['clinic_name'] ?? $o['clinic_full_name'] ?? '—') ?>
+                            </strong>
                         </div>
 
-                        <div class="landing-card-body">
-                            <div class="landing-card-row">
-                                <span>Аптека</span>
-                                <strong>
-                                    <?= htmlspecialchars($o['clinic_name'] ?? $o['clinic_full_name'] ?? '—') ?>
-                                </strong>
-                            </div>
-
-                            <?php if (!empty($items)): ?>
-                                <div class="landing-card-row landing-card-row--stacked">
-                                    <span>Состав заказа</span>
-                                    <ul class="prescriptionDrugsList">
-                                        <?php foreach ($items as $it): ?>
-                                            <li>
-                                                <div class="drugLine-main">
-                                                    <strong><?= htmlspecialchars($it['drug_name']) ?></strong>
-                                                    <?php if (!empty($it['drug_form']) || !empty($it['drug_dosage'])): ?>
-                                                        <span class="drugLine-meta">
-                                                            <?= htmlspecialchars(trim(($it['drug_form'] ?? '') . ' ' . ($it['drug_dosage'] ?? ''))) ?>
+                        <?php if (!empty($items)): ?>
+                            <div class="muted" style="margin-top:10px;">
+                                <span>Состав заказа</span>
+                                <ul style="margin: 6px 0 0 18px;">
+                                    <?php foreach ($items as $it): ?>
+                                        <li>
+                                            <div class="drugLine-main">
+                                                <strong><?= htmlspecialchars($it['drug_name']) ?></strong>
+                                                <?php if (!empty($it['form_name'])): ?>
+                                                    <span class="drugLine-meta">
+                                                            <?= htmlspecialchars($it['form_name']) ?>
                                                         </span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div class="drugLine-qty">
-                                                    Количество: <?= (int)$it['quantity'] ?>
-                                                </div>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                </div>
-                            <?php else: ?>
-                                <div class="landing-card-row">
-                                    <span>Состав заказа</span>
-                                    <div class="landing-card-note">Для этого заказа не найдены позиции.</div>
-                                </div>
-                            <?php endif; ?>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="drugLine-qty">
+                                                Количество: <?= (int)$it['quantity'] ?>
+                                            </div>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php else: ?>
+                            <div class="muted" style="margin-top:8px;">
+                                <span>Состав заказа</span>
+                                <div class="muted" style="margin-top:6px;">Для этого заказа не найдены позиции.</div>
+                            </div>
+                        <?php endif; ?>
 
-                            <?php if (!empty($o['total_amount'])): ?>
-                                <div class="landing-card-row">
-                                    <span>Итого</span>
-                                    <strong><?= htmlspecialchars($o['total_amount']) ?></strong>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </article>
-                <?php endforeach; ?>
-            </div>
 
-        <?php endif; ?>
-    </div>
-</main>
+
+                        <?php if ($status === 'dispensed'): ?>
+                            <div class="muted" style="margin-top:8px;">
+                                <span>Комментарий</span>
+                                <div class="muted" style="margin-top:6px;">
+                                    Заказ выдан. Если что-то не выдали — уточни у аптекаря.
+                                </div>
+                            </div>
+                        <?php elseif ($status === 'picked'): ?>
+                            <div class="muted" style="margin-top:8px;">
+                                <span>Комментарий</span>
+                                <div class="muted" style="margin-top:6px;">
+                                    Заказ собран. Можно подходить в аптеку.
+                                </div>
+                            </div>
+                        <?php elseif ($status === 'cancelled'): ?>
+                            <div class="muted" style="margin-top:8px;">
+                                <span>Комментарий</span>
+                                <div class="muted" style="margin-top:6px;">
+                                    Заказ отменён аптекой или администратором.
+                                </div>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+    <?php endif; ?>
+</div>
 
 <?php require_once __DIR__ . '/footer.php'; ?>
