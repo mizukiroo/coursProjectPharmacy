@@ -23,7 +23,7 @@ body {
     height: 100%;
 }
 
-/* Заголовки и логотип — TUPIK */
+/* Заголовки и логотип - TUPIK */
 h1, h2, h3,
 .landing-title,
 .herb-logo-title {
@@ -2066,7 +2066,7 @@ body {
     gap: 20px;
     align-items: stretch;
     min-height: 460px;
-    max-height: calc(100vh - 180px);
+    height: calc(100vh - 180px);
 }
 
 /* левая колонка */
@@ -2076,6 +2076,8 @@ body {
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
+
+    min-height: 0;
     padding: 18px 16px;
     border-radius: 24px;
     background: radial-gradient(circle at 0 0, #f2fff7, #dbf9e7);
@@ -2112,6 +2114,7 @@ body {
 .mapPage-results {
     margin-top: 10px;
     flex: 1;
+    min-height: 0;
     border-radius: 18px;
     background: #ffffff;
     padding: 8px 6px;
@@ -2277,7 +2280,7 @@ body {
 @media (max-width: 960px) {
     .mapPage {
         flex-direction: column;
-        max-height: none;
+        height: auto;
     }
 
     .mapPage-sidebar {
@@ -3000,4 +3003,3 @@ ol + button {
         max-width: 100%;
     }
 }
-
