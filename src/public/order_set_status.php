@@ -8,37 +8,56 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$order_id = (int)($_POST['order_id'] ?? 0);
-$status   = $_POST['status'] ?? '';
+$pharmacistId = (int)($user['role_id'] ?? 0);
+$orderId      = (int)($_POST['order_id'] ?? 0);
+$newStatus    = (string)($_POST['status'] ?? '');
 
-$allowed = ['processing','ready','cancelled'];
-if (!$order_id || !in_array($status, $allowed, true)) {
+$allowed = ['picked', 'dispensed', 'cancelled'];
+if ($pharmacistId <= 0 || $orderId <= 0 || !in_array($newStatus, $allowed, true)) {
     die('Неверные данные');
 }
 
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ? AND clinic_id = ?");
-$stmt->execute([$order_id, $user['clinic_id']]);
-$order = $stmt->fetch();
+// Берём заказ + проверяем, что фармацевт реально привязан к аптеке этого заказа
+$st = $pdo->prepare("
+    SELECT o.id, o.status, o.clinic_id
+    FROM orders o
+    JOIN pharmacist_clinics pc ON pc.clinic_id = o.clinic_id
+    WHERE o.id = ? AND pc.pharmacist_id = ?
+");
+$st->execute([$orderId, $pharmacistId]);
+$order = $st->fetch(PDO::FETCH_ASSOC);
+
 if (!$order) {
-    die('Заказ не найден');
+    die('Заказ не найден или нет доступа к аптеке');
 }
 
-$pdo->beginTransaction();
+$oldStatus = (string)($order['status'] ?? 'new');
+$clinicId  = (int)($order['clinic_id'] ?? 0);
+
+// Простые правила переходов (чтобы не ломать логику)
+// new -> picked -> dispensed
+// new/picked -> cancelled
+// dispensed/cancelled уже не трогаем
+if ($oldStatus === 'dispensed' || $oldStatus === 'cancelled') {
+    header('Location: pharmacist_orders.php?clinic_id=' . $clinicId);
+    exit;
+}
+
+if ($newStatus === 'dispensed' && $oldStatus !== 'picked') {
+    die('Нельзя выдать заказ, который не собран');
+}
+
+if ($newStatus === 'picked' && $oldStatus !== 'new') {
+    header('Location: pharmacist_orders.php?clinic_id=' . $clinicId);
+    exit;
+}
+
 try {
-    $stmt = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
-    $stmt->execute([$status, $order_id]);
-
-    $stmt = $pdo->prepare("
-        INSERT INTO order_status_history (order_id, old_status, new_status, changed_by)
-        VALUES (?, ?, ?, ?)
-    ");
-    $stmt->execute([$order_id, $order['status'] ?? 'new', $status, $_SESSION['user_id'] ?? 0]);
-
-    $pdo->commit();
+    $st = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
+    $st->execute([$newStatus, $orderId]);
 } catch (Throwable $e) {
-    $pdo->rollBack();
-    die('Ошибка обновления статуса');
+    die('Ошибка обновления статуса: ' . htmlspecialchars($e->getMessage()));
 }
 
-header('Location: pharmacist_orders.php');
+header('Location: pharmacist_orders.php?clinic_id=' . $clinicId);
 exit;
