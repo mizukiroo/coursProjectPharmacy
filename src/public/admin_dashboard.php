@@ -277,7 +277,7 @@ $drugs  = [];
 try {
     if ($qRaw !== '') {
         if ($scope === 'users') {
-            // Поиск пользователей по FULL NAME (как ты просила)
+            // Поиск пользователей по FULL NAME
             $stmt = $pdo->prepare("
                 SELECT 
                     u.*,
@@ -299,7 +299,7 @@ try {
         }
 
         if ($scope === 'orders') {
-            // число → по id заказа, текст → по ФИО пациента
+            // число -> по id заказа, текст -> по ФИО пациента
             if (ctype_digit($qRaw)) {
                 $stmt = $pdo->prepare("
                     SELECT 

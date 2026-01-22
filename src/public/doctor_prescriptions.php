@@ -187,7 +187,7 @@ include __DIR__ . '/header.php';
         </div>
     <?php endif; ?>
 
-    <!-- форма создания НОВОГО рецепта с несколькими препаратами -->
+    <!-- форма создания нового рецепта с несколькими препаратами -->
     <div class="card" style="margin-top:15px;">
         <div class="cardHeader">Новый рецепт</div>
 
@@ -233,7 +233,6 @@ include __DIR__ . '/header.php';
                 <tbody>
                 <tr class="itemRow">
                     <td>
-                        <!-- СТИЛЬ 1:1 КАК У pharmacist_receipts.php -->
                         <div class="drug-select-wrapper" style="position:relative; width:100%;">
                             <input type="text"
                                    class="drug-input"
@@ -319,9 +318,9 @@ include __DIR__ . '/header.php';
 </div>
 
 <script>
-    // формы по лекарству: { drug_id: [ {id, form_name}, ... ] }
+    // формы по лекарству
     const formsByDrug = <?= json_encode($formsByDrug, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
-    // лекарства: [{id, name}, ...]
+    // лекарства
     const drugs = <?= json_encode($drugList, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
     const itemsTable = document.getElementById('itemsTable').querySelector('tbody');

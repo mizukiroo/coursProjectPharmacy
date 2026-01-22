@@ -21,7 +21,6 @@
 
 <div class="landing">
 
-    <!-- HERO -->
     <section class="landing-hero">
         <div class="landing-hero-bg"></div>
 
@@ -63,7 +62,7 @@
             </div>
 
             <div class="landing-hero-right">
-                <!-- просто красивая иллюстрация, без пациента -->
+                <!-- просто красивая иллюстрация -->
                 <div class="landing-hero-illustration">
                     <div class="landing-hero-circle landing-hero-circle--big"></div>
                     <div class="landing-hero-circle landing-hero-circle--small"></div>

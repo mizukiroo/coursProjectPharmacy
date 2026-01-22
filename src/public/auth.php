@@ -1,5 +1,5 @@
 <?php
-// auth.php — логика авторизации и ролей
+// auth.php - логика авторизации и ролей
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
@@ -61,7 +61,7 @@ function get_current_user_data(): ?array
         return $cached = $user;
     }
 
-    // pharmacist — БЕЗ id_clinic
+    // pharmacist - без id_clinic
     $stmt = $pdo->prepare("SELECT id FROM pharmacists WHERE id_user = ?");
     $stmt->execute([$uid]);
     if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

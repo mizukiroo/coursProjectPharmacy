@@ -28,7 +28,7 @@ if ($prescriptionId <= 0 || !is_array($itemsIn)) {
     die('Неверные данные');
 }
 
-// обязательные колонки для учёта "уже заказано по рецепту"
+// обязательные колонки для учёта, уже заказано по рецепту
 if (!columnExists($pdo, 'orders', 'prescription_id') || !columnExists($pdo, 'order_items', 'prescription_item_id')) {
     die(
         "База данных не готова для контроля повторных заказов.<br>" .
@@ -53,7 +53,6 @@ $getAvailable = function(int $clinicId, int $drugId, int $formId) use ($pdo): in
     // процедура делает SELECT available_qty, поэтому можно взять первый столбец
     $available = (int)$st->fetchColumn();
 
-    // важно для MySQL/PDO после CALL
     $st->closeCursor();
 
     return $available;

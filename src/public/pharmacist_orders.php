@@ -5,7 +5,7 @@ global $pdo;
 
 $pharmacistId = (int)$user['role_id'];
 
-// 1. Аптеки, где работает фармацевт
+// Аптеки, где работает фармацевт
 $stmt = $pdo->prepare("
     SELECT c.id, c.full_name, c.short_name
     FROM pharmacist_clinics pc
@@ -52,7 +52,7 @@ include __DIR__ . '/header.php';
         </form>
 
         <?php
-        // 2. Заказы для выбранной аптеки
+        // Заказы для выбранной аптеки
         $stmt = $pdo->prepare("
             SELECT 
                 o.*,

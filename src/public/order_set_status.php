@@ -34,7 +34,7 @@ if (!$order) {
 $oldStatus = (string)($order['status'] ?? 'new');
 $clinicId  = (int)($order['clinic_id'] ?? 0);
 
-// Простые правила переходов (чтобы не ломать логику)
+// Простые правила переходов
 // new -> picked -> dispensed
 // new/picked -> cancelled
 // dispensed/cancelled уже не трогаем

@@ -19,7 +19,7 @@ $current = basename($_SERVER['PHP_SELF']);
     <header class="siteHeader herb-header">
         <div class="container herb-header-inner">
 
-            <!-- ЛОГО -->
+            <!-- логотип -->
             <a href="index.php" class="herb-logo">
                 <div class="herb-logo-mark">
                     <img src="images/logo_no_bg_white_outline.png" alt="Социальная Аптека" class="herb-logo-img">
@@ -30,7 +30,7 @@ $current = basename($_SERVER['PHP_SELF']);
                 </div>
             </a>
 
-            <!-- МЕНЮ -->
+            <!-- меню -->
             <nav class="herb-nav">
                 <a href="index.php"
                    class="herb-nav-link<?= $current === 'index.php' ? ' herb-nav-link--active' : '' ?>">
@@ -83,7 +83,7 @@ $current = basename($_SERVER['PHP_SELF']);
             </nav>
 
 
-            <!-- ПРАВО: ПОЛЬЗОВАТЕЛЬ -->
+            <!-- права пользователя -->
             <div class="herb-user">
                 <?php if ($user): ?>
                     <div class="herb-user-info">

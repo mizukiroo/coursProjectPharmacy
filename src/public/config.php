@@ -1,5 +1,5 @@
 <?php
-//config.php — подключение к БД и старт сессии
+//config.php - подключение к БД и старт сессии
 
 
 $DB_HOST = 'localhost';

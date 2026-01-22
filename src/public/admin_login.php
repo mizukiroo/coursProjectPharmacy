@@ -2,7 +2,7 @@
 require_once __DIR__ . '/auth.php';
 global $pdo;
 
-// Если уже вошёл как админ — сразу в панель
+// Если уже вошёл как админ, сразу в панель
 $cu = get_current_user_data();
 if ($cu && ($cu['role'] ?? null) === 'admin') {
     header('Location: admin_dashboard.php');
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$userRow || !password_verify($password, $userRow['password_hash'])) {
             $error = 'Неверный логин или пароль администратора.';
         } else {
-            // ВАЖНО: auth.php работает через $_SESSION['user_id']
+            // auth.php работает через $_SESSION['user_id']
             $_SESSION['user_id'] = (int)$userRow['id'];
             header('Location: admin_dashboard.php');
             exit;

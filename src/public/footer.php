@@ -40,6 +40,6 @@
     </div>
 </footer>
 
-</div><!-- .site -->
+</div>
 </body>
 </html>

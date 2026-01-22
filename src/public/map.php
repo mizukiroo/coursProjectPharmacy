@@ -40,7 +40,7 @@ foreach ($clinics as $row) {
 
 <div class="container">
     <div class="mapPage">
-        <!-- ЛЕВО: поиск -->
+        <!--поиск-->
         <aside class="mapPage-sidebar">
             <div class="mapPage-sidebarHeader">
                 <div class="mapPage-sidebarTitle">Поиск аптеки</div>
@@ -62,7 +62,7 @@ foreach ($clinics as $row) {
             </div>
         </aside>
 
-        <!-- ПРАВО: карта -->
+        <!--карта -->
         <section class="mapPage-map">
             <div id="map" class="mapPage-mapCanvas"></div>
 

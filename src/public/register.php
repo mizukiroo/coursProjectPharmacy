@@ -3,10 +3,10 @@
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/auth.php';
 
-// если уже залогинен – не даём регаться повторно
+// если уже залогинен, не даём регаться повторно
 $currentUser = function_exists('get_current_user_data') ? get_current_user_data() : null;
 if ($currentUser) {
-    // если пациент – сразу в рецепты, иначе на главную
+    // если пациент, сразу в рецепты, иначе на главную
     if (!empty($currentUser['role']) && $currentUser['role'] === 'patient') {
         header('Location: patient_prescriptions.php');
     } else {
@@ -16,7 +16,6 @@ if ($currentUser) {
 }
 
 $errors = [];
-// для "залипания" значений в форме
 $old = [
         'full_name' => '',
         'login'     => '',
@@ -40,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old['phone']     = $phone;
     $old['agree']     = $agree;
 
-    // ВАЛИДАЦИЯ
+    // валидация
     if ($full_name === '') {
         $errors[] = 'Введите ФИО';
     }
@@ -112,8 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->rollBack();
             }
             $errors[] = 'Ошибка при сохранении данных. Попробуйте позже или проверьте структуру таблиц.';
-            // при необходимости можешь временно раскомментировать:
-            // $errors[] = $e->getMessage();
         }
     }
 }
@@ -204,7 +201,7 @@ include __DIR__ . '/header.php';
 </div>
 
 
-<!-- Privacy Policy Modal -->
+<!--  Политика конфиденциальности-->
 <style>
     .modalOverlay {
         position: fixed;

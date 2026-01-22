@@ -1,8 +1,7 @@
 <?php
-// patient_prescriptions.php
 // Пациент: рецепты + бронирование по каждой позиции (разные аптеки), живой поиск аптек
-// Наличие: receipts/receipt_items - orders/order_items (кроме cancelled)
-// Лимит по рецепту: (назначено - уже заказано по этой строке)
+// Наличие: receipts/receipt_items - orders/order_items
+// Лимит по рецепту
 
 if (isset($_GET['ajax']) && $_GET['ajax'] === 'stock') {
     require_once __DIR__ . '/auth.php';
@@ -32,7 +31,7 @@ if (isset($_GET['ajax']) && $_GET['ajax'] === 'stock') {
     $st->execute([$clinicId, $drugId, $formId]);
     $incoming = (int)$st->fetchColumn();
 
-    // расход (кроме cancelled)
+    // расход
     $st = $pdo->prepare("
         SELECT COALESCE(SUM(oi.quantity), 0)
         FROM orders o
@@ -66,7 +65,7 @@ if ($customerId <= 0) {
     exit;
 }
 
-// аптеки для live-поиска
+// аптеки для живого поиска
 $clinics = $pdo->query("
     SELECT id, short_name, full_name
     FROM clinics

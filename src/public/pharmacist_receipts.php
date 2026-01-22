@@ -5,7 +5,7 @@ global $pdo;
 
 $pharmacistId = (int)$user['role_id'];
 
-// 1. Клиники, где работает фармацевт
+// Клиники, где работает фармацевт
 $stmt = $pdo->prepare("
     SELECT c.id, c.full_name, c.short_name
     FROM pharmacist_clinics pc
@@ -20,7 +20,7 @@ $clinicId = (int)($_REQUEST['clinic_id'] ?? ($clinics[0]['id'] ?? 0));
 
 $error = null;
 
-// 2. Обработка формы: ОДНА накладная с МНОГО лекарств
+// Обработка формы: одна накладная со многими лекарствами
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $clinicId = (int)($_POST['clinic_id'] ?? 0);
 
@@ -107,8 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 3. Справочники
-
 // все лекарства
 $drugs = $pdo->query("
     SELECT id, name
@@ -124,7 +122,7 @@ $rows = $pdo->query("
     ORDER BY df.drug_id, f.form_name
 ")->fetchAll(PDO::FETCH_ASSOC);
 
-// соберём в массив вида [drug_id => [ ['id'=>..,'form_name'=>..], ... ]]
+// соберём в массив
 $formsByDrug = [];
 foreach ($rows as $row) {
     $dId = (int)$row['drug_id'];
@@ -146,7 +144,7 @@ foreach ($drugs as $d) {
     ];
 }
 
-// 4. Список накладных для выбранной аптеки
+// Список накладных для выбранной аптеки
 $receipts = [];
 if ($clinicId > 0) {
     $stmt = $pdo->prepare("

@@ -71,7 +71,7 @@ $statusMap = [
                 $status = $o['status'] ?? 'new';
                 $statusLabel = $statusMap[$status] ?? $status;
 
-                // Под те же классы, что у pharmacist_orders.php (если они есть в CSS)
+                // Под те же классы, что у pharmacist_orders.php
                 $badgeClass = 'status-new';
                 if ($status === 'picked')    $badgeClass = 'status-picked';
                 if ($status === 'dispensed') $badgeClass = 'status-dispensed';

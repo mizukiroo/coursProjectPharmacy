@@ -10,10 +10,10 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 $error = null;
 $info  = null;
 
-// Если пользователь уже залогинен — НЕ редиректим насильно, показываем сообщение
+// Если пользователь уже залогинен показываем сообщение
 $currentUser = function_exists('get_current_user_data') ? get_current_user_data() : null;
 
-// "Войти другим" — чистим сессию и остаёмся на login.php
+//чистим сессию и остаёмся на login.php
 if (isset($_GET['switch']) && $_GET['switch'] === '1') {
     $_SESSION = [];
 
