@@ -6,7 +6,6 @@
 <footer class="siteFooter herb-footer">
     <div class="container herb-footer-grid">
         <div class="herb-footer-brand">
-            <div class="herb-logo-mark herb-logo-mark--small">✤</div>
             <div>
                 <div class="herb-footer-title">Социальная Аптека</div>
                 <div class="herb-footer-subtitle">
@@ -23,10 +22,9 @@
         </div>
 
         <div class="herb-footer-col">
-            <div class="herb-footer-head">Полезно</div>
-            <a href="https://www.gosuslugi.ru" target="_blank" rel="noreferrer">Портал Госуслуг</a>
-            <a href="javascript:void(0)">Памятка пациенту</a>
-            <a href="javascript:void(0)">Информация для аптек</a>
+            <div class="herb-footer-head">Датасеты</div>
+            <a href="https://data.mos.ru/opendata/503?pageSize=10&pageIndex=0&isDynamic=false&version=3&release=714" target="_blank" rel="noreferrer">Датасет "Поликлиническая помощь взрослым"</a>
+            <a href="https://www.garant.ru/products/ipo/prime/doc/72761778/#1000">Перечень лекарственных препаратов</a>
         </div>
 
         <div class="herb-footer-col">
@@ -38,7 +36,6 @@
     <div class="herb-footer-bottom">
         <div class="container herb-footer-bottom-row">
             <span>© <?= date('Y') ?> Социальная Аптека</span>
-            <span class="herb-footer-mini">Данные используются в рамках госпрограмм льготного лекарственного обеспечения.</span>
         </div>
     </div>
 </footer>

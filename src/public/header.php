@@ -21,7 +21,9 @@ $current = basename($_SERVER['PHP_SELF']);
 
             <!-- ЛОГО -->
             <a href="index.php" class="herb-logo">
-                <div class="herb-logo-mark">✤</div>
+                <div class="herb-logo-mark">
+                    <img src="images/logo_no_bg_white_outline.png" alt="Социальная Аптека" class="herb-logo-img">
+                </div>
                 <div class="herb-logo-text">
                     <div class="herb-logo-title">Социальные Аптеки Москвы</div>
                     <div class="herb-logo-subtitle">льготные лекарства онлайн</div>
