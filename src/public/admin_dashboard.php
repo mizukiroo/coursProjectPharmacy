@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif ($role === 'patient') {
                     $pdo->prepare("INSERT INTO customers (id_user) VALUES (?)")->execute([$newUserId]);
                 } elseif ($role === 'pharmacist') {
-                    $pdo->prepare("INSERT INTO pharmacists (id_user, id_clinic) VALUES (?, NULL)")->execute([$newUserId]);
+                    $pdo->prepare("INSERT INTO pharmacists (id_user) VALUES (?)")->execute([$newUserId]);
                 } elseif ($role === 'doctor') {
                     $specId = get_default_specialty_id($pdo);
                     $pdo->prepare("INSERT INTO doctors (id_user, id_specialty) VALUES (?, ?)")->execute([$newUserId, $specId]);
@@ -211,67 +211,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Нельзя удалить самого себя.';
         } else {
             try {
-                $pdo->beginTransaction();
-
-                $stmt = $pdo->prepare("
-                    SELECT 
-                        u.id,
-                        c.id  AS customer_id,
-                        d.id  AS doctor_id,
-                        p.id  AS pharmacist_id
-                    FROM users u
-                    LEFT JOIN customers   c ON c.id_user = u.id
-                    LEFT JOIN doctors     d ON d.id_user = u.id
-                    LEFT JOIN pharmacists p ON p.id_user = u.id
-                    WHERE u.id = ?
-                    FOR UPDATE
-                ");
+                $stmt = $pdo->prepare("CALL sp_delete_user_cascade(?)");
                 $stmt->execute([$userId]);
-                $info = $stmt->fetch(PDO::FETCH_ASSOC);
-                if (!$info) throw new RuntimeException('Пользователь не найден.');
+                $stmt->closeCursor(); // важно после CALL
 
-                if (!empty($info['customer_id'])) {
-                    $cid = (int)$info['customer_id'];
-
-                    $pdo->prepare("
-                        DELETE oi FROM order_items oi
-                        JOIN orders o ON o.id = oi.order_id
-                        WHERE o.customer_id = ?
-                    ")->execute([$cid]);
-                    $pdo->prepare("DELETE FROM orders WHERE customer_id = ?")->execute([$cid]);
-
-                    $pdo->prepare("
-                        DELETE pi FROM prescription_items pi
-                        JOIN prescriptions p ON p.id = pi.prescription_id
-                        WHERE p.customer_id = ?
-                    ")->execute([$cid]);
-                    $pdo->prepare("DELETE FROM prescriptions WHERE customer_id = ?")->execute([$cid]);
-
-                    $pdo->prepare("DELETE FROM customers WHERE id = ?")->execute([$cid]);
-                }
-
-                if (!empty($info['doctor_id'])) {
-                    $did = (int)$info['doctor_id'];
-                    $pdo->prepare("DELETE FROM clinic_doctors WHERE id_doctor = ?")->execute([$did]);
-                    $pdo->prepare("DELETE FROM doctors WHERE id = ?")->execute([$did]);
-                }
-
-                if (!empty($info['pharmacist_id'])) {
-                    $pid = (int)$info['pharmacist_id'];
-                    $pdo->prepare("DELETE FROM pharmacists WHERE id = ?")->execute([$pid]);
-                }
-
-                $pdo->prepare("DELETE FROM admins WHERE id_user = ?")->execute([$userId]);
-                $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$userId]);
-
-                $pdo->commit();
                 $message = 'Пользователь и связанные данные удалены.';
             } catch (Throwable $e) {
-                if ($pdo->inTransaction()) $pdo->rollBack();
                 $error = 'Ошибка при удалении пользователя: ' . $e->getMessage();
             }
         }
     }
+
 
     // Удалить заказ
     elseif ($action === 'delete_order') {
@@ -640,7 +590,6 @@ include __DIR__ . '/header.php';
                                 <th>Дата</th>
                                 <th>Пациент</th>
                                 <th>Аптека</th>
-                                <th>Итого</th>
                                 <th>Сохранить</th>
                                 <th>Удалить</th>
                             </tr>
@@ -657,9 +606,7 @@ include __DIR__ . '/header.php';
                                     </td>
                                     <td><?= htmlspecialchars($o['customer_name'] ?? '—') ?></td>
                                     <td><?= htmlspecialchars($o['clinic_name'] ?? '—') ?></td>
-                                    <td>
-                                        <input type="text" name="total_amount" value="<?= htmlspecialchars($o['total_amount']) ?>" class="input adminMoneyInput">
-                                    </td>
+
                                     <td>
                                         <button class="btn adminInlineBtn" type="submit">Сохранить</button>
                                         </form>

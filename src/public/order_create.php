@@ -47,32 +47,18 @@ if (!$st->fetchColumn()) {
 }
 
 $getAvailable = function(int $clinicId, int $drugId, int $formId) use ($pdo): int {
-    $st = $pdo->prepare("
-        SELECT COALESCE(SUM(ri.quantity), 0)
-        FROM receipts r
-        JOIN receipt_items ri ON ri.receipt_id = r.id
-        WHERE r.clinic_id = ?
-          AND ri.drug_id = ?
-          AND ri.form_id = ?
-    ");
+    $st = $pdo->prepare("CALL sp_get_available_qty(?, ?, ?)");
     $st->execute([$clinicId, $drugId, $formId]);
-    $incoming = (int)$st->fetchColumn();
 
-    $st = $pdo->prepare("
-        SELECT COALESCE(SUM(oi.quantity), 0)
-        FROM orders o
-        JOIN order_items oi ON oi.order_id = o.id
-        WHERE o.clinic_id = ?
-          AND o.status <> 'cancelled'
-          AND oi.drug_id = ?
-          AND oi.form_id = ?
-    ");
-    $st->execute([$clinicId, $drugId, $formId]);
-    $outgoing = (int)$st->fetchColumn();
+    // процедура делает SELECT available_qty, поэтому можно взять первый столбец
+    $available = (int)$st->fetchColumn();
 
-    $available = $incoming - $outgoing;
-    return ($available < 0) ? 0 : $available;
+    // важно для MySQL/PDO после CALL
+    $st->closeCursor();
+
+    return $available;
 };
+
 
 $getAlreadyOrdered = function(int $prescriptionId, int $prescriptionItemId) use ($pdo): int {
     $st = $pdo->prepare("

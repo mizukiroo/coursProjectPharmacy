@@ -1,47 +1,18 @@
 <?php
 require_once __DIR__ . '/config.php';
 $page_class = 'page-map';
-
 include __DIR__ . '/header.php';
 
-// Сегодняшний день недели и текущее время
-$todayDow = (int)date('N');       // 1–7 (1 = понедельник)
-$nowTime  = date('H:i:s');
+$dow     = (int)date('N');      // 1..7
+$nowTime = date('H:i:s');       // HH:MM:SS
 
-// Загружаем аптеки с режимом работы на сегодня
-$stmt = $pdo->prepare("
-    SELECT
-        c.id,
-        c.full_name,
-        c.short_name,
-        c.has_drugstore,
-        a.address_line,
-        a.lon,
-        a.lat,
-        wh.open_time,
-        wh.close_time,
-        CASE 
-            WHEN wh.open_time IS NOT NULL 
-             AND wh.close_time IS NOT NULL
-             AND :now_time BETWEEN wh.open_time AND wh.close_time
-            THEN 1
-            ELSE 0
-        END AS is_open_now
-    FROM clinics c
-    LEFT JOIN addresses a 
-        ON a.id = c.id_address
-    LEFT JOIN clinic_working_hours wh
-        ON wh.id_clinic = c.id
-       AND wh.day_of_week = :dow
-    WHERE c.has_drugstore = 1
-    ORDER BY c.full_name
-");
+$stmt = $pdo->prepare("CALL sp_get_clinics_for_map(?, ?)");
+$stmt->execute([$dow, $nowTime]);
 
-$stmt->execute([
-        'dow'      => $todayDow,
-        'now_time' => $nowTime,
-]);
 $clinics = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// (важно для некоторых конфигураций PDO/MySQL при CALL)
+$stmt->closeCursor();
 
 // Данные для JS
 $clinicsForJs = [];
@@ -61,8 +32,8 @@ foreach ($clinics as $row) {
             'lat'        => $lat,
     ];
 }
-
 ?>
+
 <div class="container pageHeader">
     <h1>Карта социальных аптек</h1>
 </div>

@@ -17,20 +17,11 @@ if (!$customerId) {
 }
 
 // Загружаем заказы пациента
-$stmt = $pdo->prepare("
-    SELECT 
-        o.id,
-        o.order_date,
-        o.status,
-        c.short_name AS clinic_name,
-        c.full_name  AS clinic_full_name
-    FROM orders o
-    LEFT JOIN clinics c ON c.id = o.clinic_id
-    WHERE o.customer_id = :cid
-    ORDER BY o.order_date DESC, o.id DESC
-");
-$stmt->execute(['cid' => $customerId]);
+$stmt = $pdo->prepare("CALL sp_get_orders_by_customer(?)");
+$stmt->execute([$customerId]);
 $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->closeCursor(); // важно после CALL
+
 
 // Позиции заказа
 $stmtItems = $pdo->prepare("

@@ -54,35 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($login === '' || $password === '') {
         $error = 'Введите логин и пароль.';
     } else {
-        $stmt = $pdo->prepare("
-            SELECT 
-                u.id, u.login, u.password_hash,
-                CASE
-                    WHEN a.id_user IS NOT NULL THEN 'admin'
-                    WHEN d.id_user IS NOT NULL THEN 'doctor'
-                    WHEN p.id_user IS NOT NULL THEN 'pharmacist'
-                    WHEN c.id_user IS NOT NULL THEN 'patient'
-                    ELSE 'none'
-                END AS role
-            FROM users u
-            LEFT JOIN admins a      ON a.id_user = u.id
-            LEFT JOIN doctors d     ON d.id_user = u.id
-            LEFT JOIN pharmacists p ON p.id_user = u.id
-            LEFT JOIN customers c   ON c.id_user = u.id
-            WHERE u.login = :login
-            LIMIT 1
-        ");
-        $stmt->execute(['login' => $login]);
+        $stmt = $pdo->prepare("CALL sp_get_user_for_login(?)");
+        $stmt->execute([$login]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->closeCursor();
 
         if (!$row || !password_verify($password, $row['password_hash'])) {
             $error = 'Неверный логин или пароль.';
         } else {
-            // чтобы не “прилипала” старая сессия
             session_regenerate_id(true);
             $_SESSION['user_id'] = (int)$row['id'];
 
-            // редирект по роли (как было у тебя)
             if (($row['role'] ?? '') === 'admin') {
                 header('Location: admin_dashboard.php');
                 exit;
@@ -93,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 include __DIR__ . '/header.php';
 ?>

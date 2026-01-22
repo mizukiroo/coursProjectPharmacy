@@ -1,11 +1,11 @@
 <?php
-// config.php — подключение к БД и старт сессии
+//config.php — подключение к БД и старт сессии
 
 
 $DB_HOST = 'localhost';
 $DB_NAME = 'course_pharmacy';
-$DB_USER = 'root';      // поменяй при необходимости
-$DB_PASS = '';          // твой пароль к БД
+$DB_USER = 'root';
+$DB_PASS = '';
 
 try {
     $pdo = new PDO(
